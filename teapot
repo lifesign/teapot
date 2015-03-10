@@ -1,4 +1,18 @@
 #!/usr/bin/env php
 <?php
 
+$_ENV['HOME'] = getenv('HOME');
+
+function teapot_path()
+{
+    if (isset($_SERVER['HOME']))
+    {
+        return $_SERVER['HOME'].'/.teapot';
+    }
+    else
+    {
+        return $_SERVER['HOMEDRIVE'].$_SERVER['HOMEPATH'].DIRECTORY_SEPARATOR.'.teapot';
+    }
+}
+
 require __DIR__.'/src/bootstrap.php';

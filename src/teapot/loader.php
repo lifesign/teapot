@@ -45,6 +45,7 @@ class Loader
      * Add avaliable commands
      */
     public function addCommands() {
+        // print_r($this->commands);exit;
         foreach ((array) $this->commands as $command) {
             $class = __NAMESPACE__ . "\\Commands\\".$command;
             $this->app->add(new $class);
@@ -62,10 +63,12 @@ class Loader
     }
 
     private function resolveCommands() {
-        $filename = __DIR__ .'/../../'.self::FILENAME;
 
-        if (! $this->filesystem->exists($filename)) {
-            throw new Exception("No teapot.yml configuration file found");
+        if (! $this->filesystem->exists($filename = teapot_path() . '/' . self::FILENAME)) {
+            // @todo write to stdout
+            if (! $this->filesystem->exists($filename = __DIR__ . '/stubs/' . self::FILENAME)) {
+                throw new \Exception("No teapot.yml configuration file found.");
+            }
         }
 
         $metadata = $this->parseYamlFile($filename);
@@ -78,7 +81,7 @@ class Loader
         try {
             $config = $this->yamlParser->parse(file_get_contents($filename));
         } catch (ParseException $e) {
-            throw new Exception("Parse Error");
+            throw new \Exception("Parse Error");
         }
 
         return is_array($config) ? $config : array();
@@ -97,6 +100,7 @@ class Loader
         }
 
         foreach ($directories as $dir) {
+            $finder = new Finder();
             $files = $finder->files()
                             ->ignoreDotFiles(true);
 
@@ -112,7 +116,7 @@ class Loader
                 $commands[] = $dir->getRelativePathname() . '\\' . $file->getBasename('.php');
             }
         }
-
+        
         return $commands;
     }
 }

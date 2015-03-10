@@ -1,8 +1,16 @@
+---
+#url is for download the specified version of laravel
 url:
     latest: http://laravel-china.qiniudn.com/dist/latest.zip
     v4: http://laravel-china.qiniudn.com/dist/latest.zip
     v5: http://laravel-china.qiniudn.com/dist/latest.zip
 
+# exclude commands
+## For Example
+##
 #exclude:
 #    files: 
+#       - foo
 #    folder:
+#       - DirectoryFoo
+#       - DirectoryBar
