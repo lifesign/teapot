@@ -1,0 +1,8 @@
+url:
+    latest: http://laravel-china.qiniudn.com/dist/latest.zip
+    v4: http://laravel-china.qiniudn.com/dist/latest.zip
+    v5: http://laravel-china.qiniudn.com/dist/latest.zip
+
+#exclude:
+#    files: 
+#    folder:
