@@ -15,4 +15,9 @@ function teapot_path()
     }
 }
 
+function with($obj)
+{
+    return $obj;
+}
+
 require __DIR__.'/src/bootstrap.php';

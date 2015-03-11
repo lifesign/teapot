@@ -5,6 +5,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Parser;
+use Teapot\Loader;
 use ZipArchive;
 
 class ProjectInitCommand extends \Symfony\Component\Console\Command\Command
@@ -42,27 +45,31 @@ class ProjectInitCommand extends \Symfony\Component\Console\Command\Command
             $output
         );
 
-        $output->writeln('<info>Crafting application...</info>');
-        $output->writeln('<info>Target Directory is '.$directory.'</info>');
+        $version = $input->getArgument('version') ?: 'latest';
 
-        $this->download($zipFile = $this->makeFilename())
-             ->extract($zipFile, $directory)
-             ->cleanUp($zipFile);
+        $output->writeln("<info>Crafting application...</info>");
+        $output->writeln("<info>Target Directory is {$directory}.</info>");
+        $output->writeln("<info>Download Laravel Version is {$version}</info>");
 
-        // run some create project composer command
-        $composer = $this->findComposer();
-        $commands = array(
-            $composer.' run-script post-install-cmd',
-            $composer.' run-script post-create-project-cmd',
-        );
+        if ($this->resolveVersion($version, $directory, $input, $output)) {
+            // run some create project composer command
+            $composer = $this->findComposer();
+            $commands = array(
+                $composer.' run-script post-install-cmd',
+                $composer.' run-script post-create-project-cmd',
+            );
 
-        $process = new Process(implode(' && ', $commands), $directory, null, null, null);
+            $process = new Process(implode(' && ', $commands), $directory, null, null, null);
 
-        $process->run(function ($type, $line) use ($output) {
-            $output->write($line);
-        });
+            $process->run(function ($type, $line) use ($output) {
+                $output->write($line);
+            });
 
-        $output->writeln('<comment>Application ready! Build something amazing.</comment>');
+            $output->writeln('<comment>Application ready! Build something amazing.</comment>');
+
+        } else {
+            $output->writeln('<error>Unknown version (Support: `v5`, `v4` or `latest`)</error>');
+        }
     }
 
     /**
@@ -91,18 +98,57 @@ class ProjectInitCommand extends \Symfony\Component\Console\Command\Command
     }
 
     /**
+     * Resolve the download version
+     *
+     * @param                  $version
+     * @param                  $directory
+     * @param  InputInterface  $input
+     * @param  OutputInterface $output
+     * @return $this|bool
+     */
+    protected function resolveVersion($version, $directory, InputInterface $input, OutputInterface $output)
+    {
+        //support v4,v5,latest
+        if ('v4' == $version ||
+            'v5' == $version ||
+            'latest' == $version) {
+            $this->downloadVersion($version, $directory);
+
+            return $this;
+        }
+
+        return false;
+    }
+
+    /**
      * Download the temporary Zip to the given file.
      *
      * @param  string  $zipFile
      * @return $this
      */
-    protected function download($zipFile)
+    protected function download($url, $zipFile)
     {
-        $response = \GuzzleHttp\get('http://laravel-china.qiniudn.com/dist/latest.zip')->getBody();
+        $response = \GuzzleHttp\get($url)->getBody();
 
         file_put_contents($zipFile, $response);
 
         return $this;
+    }
+
+    /**
+     * Download the specified version zip
+     * @param  string $version
+     * @param  string $directory
+     * @return $this
+     */
+    protected function downloadVersion($version, $directory)
+    {
+        $config = with(new Parser)->parse(file_get_contents(teapot_path() . '/'.Loader::FILENAME));
+        $url = $config['url'][$version];
+
+        $this->download($url, $zipFile = $this->makeFilename())
+             ->extract($zipFile, $directory)
+             ->cleanUp($zipFile);
     }
 
 
