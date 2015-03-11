@@ -1,5 +1,4 @@
 # teapot
-====
 A toolkit for install laravel
 
 Currently is under developing ~ Keep in touch
@@ -10,7 +9,8 @@ Currently is under developing ~ Keep in touch
 - [x] Crafting applications
 - [x] Init/Edit teapot.yml
 - [x] Exclude Commands by folders or files
-- [ ] Support Crafting applications with Version
+- [ ] Support Crafting applications with version
+- [ ] Support Crafting Cache
 - [ ] Packgist proxy config
 - [ ] Crafting Template
 - [ ] ...
